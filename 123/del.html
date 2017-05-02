@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>表格编辑</title>
+
+</head>
+<body>
+	<form action="http://www.baidu.com">
+		ID:<input type="text" value=""/>
+		姓名:<input type="text" value=""/>
+		电话:<input type="text" value=""/>
+		<button onclick="add()">添加</button>
+	</form>
+	<table border="1" cellspacing="0">
+		<tr>
+			<th>ID</th>
+			<th>Name</th>
+			<th>Tel</th>
+			<th>操作</th>
+		</tr>
+	</table>
+
+	<script type="text/javascript">
+		var tabs = document.getElementsByTagName('table')[0];
+	
+		function add(){
+			event.preventDefault();
+
+			var val = document.getElementsByTagName('input');
+	
+			var x =val[0].value;
+			var y =val[1].value;
+			var z=val[2].value;
+			var li =document.createElement('tr');
+			li.innerHTML= "<tr><td>"+x+"</td><td>"+y+"</td><td>"+z+"</td><th><a onclick='del()' href='#'>删除</a></th></tr>";
+			tabs.appendChild(li);
+		}
+
+		function del(){
+			 event.preventDefault();
+
+			event.path[3].removeChild(event.path[2]);
+		
+		}
+	</script>
+</body>
+</head>
+
+
+</body>
+</html>
