@@ -51,7 +51,7 @@ var Game = (function(_super){
                 setTimeout(function() {
                     arr[index].startScroll();
                 }, index*200);
-            })(i,this.body)
+            })(i,this.body);
             
         }
 
@@ -70,7 +70,9 @@ var Game = (function(_super){
             this.body[i].endScroll(num);
             this.txt.text += num +','
         }
-
+        Laya.timer.once(2000, this, function(){
+            this.start.visible = true;
+        });
     };
 
     //注册类
