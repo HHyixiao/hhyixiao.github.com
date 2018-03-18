@@ -1,7 +1,8 @@
 var LayaSample = (function(){
     (function(){
         //初始化引擎
-        Laya.init(800,600);
+        Laya.init(320, 480, Laya.WebGL);
+        Laya.stage.scaleMode = "showall";
         //设置背景颜色
         Laya.stage.bgColor = "#fff";
         //加载资源
