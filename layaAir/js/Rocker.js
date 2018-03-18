@@ -62,7 +62,7 @@ var Rocker = (function(){
     }
 
     _proto.mouseup = function () {
-        this.body.pos(this.x,this.y);
+        this.body.pos(0,0);
     }
 
     return Rocker;
