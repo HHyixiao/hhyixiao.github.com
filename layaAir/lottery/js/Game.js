@@ -34,7 +34,7 @@ var Game = (function(_super){
             }
 
 
-
+            
             // 抽奖结果
             this.result = new Laya.Sprite();
             this.result.scale(.2, .2);
@@ -57,7 +57,7 @@ var Game = (function(_super){
     _proto.reset = function (){
         this.count = 0;
         this.txt.text = "。。。";
-        
+        this.resultArr = [];
     }
     _proto.go = function (){
         this.reset();
@@ -81,6 +81,14 @@ var Game = (function(_super){
         this.aaa.visible = false;
 
         this.txt.text = '';
+
+        for (var i = 0; i < this.body.length; i++) {
+            var num = Math.random()*8>>0;
+            num = num + 1;
+            this.resultArr.push(num);
+            this.txt.text += num +',';
+            this.result.getChildAt(i).loadImage('comp/'+num+'.jpg');
+        }
 
         this.endOnewheel(this.count);
 
@@ -111,12 +119,8 @@ var Game = (function(_super){
     }
 
     _proto.endOnewheel = function (i) {
-        var num = Math.random()*8>>0;
-        // var num = 0;
-        num = num + 1;
-        this.body[i].endScroll(num);
-        this.txt.text += num +',';
-        this.result.getChildAt(i).loadImage('comp/'+num+'.jpg');
+        this.body[i].endScroll(this.resultArr[i]);
+
     }
 
     //注册类
