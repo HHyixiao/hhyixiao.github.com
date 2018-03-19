@@ -53219,7 +53219,7 @@ var Wheel = (function(){
 
         this.reset();
 
-        this.recoup = 20;
+        this.recoup = 20; //补偿位置
 
         this.scaleValue = .2;
 
@@ -53234,24 +53234,12 @@ var Wheel = (function(){
             sp.pos(0,i*120-this.height);
             this.addChild(sp);
         }
-        // console.log(this,this.y,this.x);
-
-        // this.bg1 = new Laya.Sprite();
-        // this.bg1.loadImage(imgSrc);
-        // this.addChild(this.bg1);
-
-        // this.bg2 = new Laya.Sprite();
-        // this.bg2.loadImage(imgSrc);
-        // this.addChild(this.bg2);
-        // this.bg2.pos(this.bg1.x,this.bg1.y-this.height);
         
         this.oldY = y;
 
         this.pos(x,y);
-
         
         this.scale(this.scaleValue, this.scaleValue);
-        // Laya.timer.frameLoop(1,this,this.onLoop);
         Laya.timer.frameLoop(1,this,this.onLoop);
     }
 
@@ -53265,8 +53253,8 @@ var Wheel = (function(){
         this.stop = true;
         this.flag = true;
         this.speed = 1;
-        this.acceleration = .1;
-        this.speedAddTime = 2000;
+        this.acceleration = .05;
+        this.speedAddTime = 1000;
         this.stopAcceleration = Laya.Browser.now() + this.speedAddTime;
     }
     _proto.onLoop = function (){
@@ -53296,7 +53284,7 @@ var Wheel = (function(){
 
     _proto.endScroll = function(num){
         if (!this.flag) {
-            this.slowDown = Laya.Browser.now() + this.speedAddTime;
+            this.slowDown = Laya.Browser.now() + this.speedAddTime/2;
             var index = this.returnImgSrcArrIndex(num);
             Laya.timer.frameLoop(1,this,this.endLoop,[index]);
         }
@@ -53304,56 +53292,48 @@ var Wheel = (function(){
 
     _proto.endLoop = function (num) {
         if (Laya.Browser.now() < this.slowDown && this.speed > 1) {
-            this.speed -= this.acceleration
+            this.speed -= this.acceleration*2
         } else {
             this.speed = 1;
 
-            this.y = Math.round(this.y);
-
-            
-
             var oneImgHeight = this.height * this.scaleValue / this.imgSrcArr.length;
             var item = oneImgHeight * (this.imgSrcArr.length-num)  ;
-            // console.log(item,this.y,num,this.speed,index,this.imgSrcArr.length,Math.abs(this.y - item -this.recoup))
-            // console.log(item,this.y,num,Math.abs(Math.round(this.y) - item - this.recoup))
 
             if (Math.abs(this.y - item - this.recoup)%(this.height * this.scaleValue) <= 1 ) {
-            // if (Math.abs(this.y-24 - this.recoup) <= 1 ) {
-                // console.log(this.y,this.height*this.scaleValue);
                 this.stop = true;
                 this.flag = true;
                 Laya.timer.clear(this,this.endLoop);
             }
 
-            // if (this.y >= item) {
-            //     this.stop = true;
-            //     this.flag = true;
-            //     Laya.timer.clear(this,this.endLoop);
-            // }
         }
     }
 
     _proto.returnImgSrcArrIndex = function(num){
         for (var i = 0; i < this.imgSrcArr.length; i++) {
-            if (this.imgSrcArr[i] == num) {
-                return i;
-            }
+            if (this.imgSrcArr[i] == num) return i;
         }
         return -1;
     }
-
 
     return Wheel;
 })();
 var Game = (function(_super){
     function Game(arr){
         Game.super(this);
+
+            this.txt = new Laya.Text();
+            this.fontSize = 32;
+            this.txt.color = "#c30c30";
+            this.txt.pos(80,110);
+            Laya.stage.addChild(this.txt);
+
+            this.reset();
         
             this.start = this.getChildByName("start");
             this.aaa = this.getChildByName("end");
             this.aaa.visible = false;
 
-            this.bodyBox = new Laya.Panel(); //Panel
+            this.bodyBox = new Laya.Panel(); //Panel Sprite
             this.bodyBox.pos(80,165);
             this.bodyBox.size(105,70);
 
@@ -53372,12 +53352,7 @@ var Game = (function(_super){
                 this.bodyBox.addChild(wheel);
             }
 
-            this.txt = new Laya.Text();
-            this.txt.text = "。。。";
-            this.fontSize = 32;
-            this.txt.color = "#c30c30";
-            this.txt.pos(80,110);
-            Laya.stage.addChild(this.txt);
+
 
             // 抽奖结果
             this.result = new Laya.Sprite();
@@ -53398,14 +53373,14 @@ var Game = (function(_super){
 
     var _proto = Game.prototype;
 
+    _proto.reset = function (){
+        this.count = 0;
+        this.txt.text = "。。。";
+        
+    }
     _proto.go = function (){
+        this.reset();
         this.start.visible = false;
-        // this.body[0].startScroll();
-        // for (var i = 0; i < this.body.length; i++) {
-        //     (function(index,arr){
-                
-        //     })(i,this.body);
-        // }
 
         for (var i = 0; i < this.body.length; i++) {
             (function(index,arr){
@@ -53413,7 +53388,6 @@ var Game = (function(_super){
                     arr[index].startScroll();
                 }, index*200);
             })(i,this.body);
-            
         }
 
 
@@ -53426,18 +53400,43 @@ var Game = (function(_super){
         this.aaa.visible = false;
 
         this.txt.text = '';
-        for (var i = 0; i < this.body.length; i++) {
-            var num = Math.random()*8>>0;
-            // var num = 0;
-            num = num + 1;
-            this.body[i].endScroll(num);
-            this.txt.text += num +',';
-            this.result.getChildAt(i).loadImage('comp/'+num+'.jpg');
-        }
+
+        this.endOnewheel(this.count);
+
+        Laya.timer.frameLoop(1,this,this.onLoop);
+        // for (var i = 0; i < this.body.length; i++) {
+        //     var num = Math.random()*8>>0;
+        //     // var num = 0;
+        //     num = num + 1;
+        //     this.body[i].endScroll(num);
+        //     this.txt.text += num +',';
+        //     this.result.getChildAt(i).loadImage('comp/'+num+'.jpg');
+        // }
+
         Laya.timer.once(2000, this, function(){
             this.start.visible = true;
         });
     };
+
+    _proto.onLoop = function () {
+        if (this.body[this.count].stop ) {
+            this.count++;
+            if (this.count > this.body.length-1) {
+                Laya.timer.clear(this,this.onLoop);
+                return
+            }
+            this.endOnewheel(this.count);
+        }
+    }
+
+    _proto.endOnewheel = function (i) {
+        var num = Math.random()*8>>0;
+        // var num = 0;
+        num = num + 1;
+        this.body[i].endScroll(num);
+        this.txt.text += num +',';
+        this.result.getChildAt(i).loadImage('comp/'+num+'.jpg');
+    }
 
     //注册类
     return Game;
